@@ -53,6 +53,11 @@ The fixed key idea in the interface is:
 
 > The map is not just a picture of democracy; it is one of the machines that produces it.
 
+
 ## AI Assistance Note
 
 AI assistance was used to help generate the code for this Part 4 artifact, which is allowed for this project point.
+
+&nbsp;
+
+![Alt Text](Screenshot_2026-06-04_212611.png)
