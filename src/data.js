@@ -1,17 +1,21 @@
-export const DISTRICT_SIZE = 20;
+export const GRID_SIZE = 10;
+export const DISTRICT_COUNT = 5;
+export const DISTRICT_SIZE = (GRID_SIZE * GRID_SIZE) / DISTRICT_COUNT;
 
 export const PARTIES = {
   B: {
+    id: 'B',
     name: 'Blue',
-    shortName: 'B',
+    opposite: 'R',
   },
   R: {
+    id: 'R',
     name: 'Red',
-    shortName: 'R',
+    opposite: 'B',
   },
 };
 
-export const VOTER_ROWS = [
+export const DEFAULT_VOTER_ROWS = [
   'BBBBRRRRRR',
   'BBBBRRRRRR',
   'BBBBBBRRRR',
@@ -24,94 +28,119 @@ export const VOTER_ROWS = [
   'BRRRRRRRRR',
 ];
 
-export const VOTERS = VOTER_ROWS.flatMap((row, rowIndex) =>
-  [...row].map((preference, colIndex) => ({
-    id: `${rowIndex}-${colIndex}`,
-    row: rowIndex,
-    col: colIndex,
-    preference,
-  })),
-);
+export const VOTER_EXAMPLES = {
+  clustered: {
+    name: 'Clustered communities',
+    description: 'The original 51–49 pattern, with several visible geographic clusters.',
+    rows: DEFAULT_VOTER_ROWS,
+  },
+  halves: {
+    name: 'Polarized halves',
+    description: 'Two equally sized blocs separated by a sharp geographic line.',
+    rows: [
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+      'BBBBBRRRRR',
+    ],
+  },
+  checkerboard: {
+    name: 'Evenly mixed',
+    description: 'A 50–50 checkerboard with almost no same-party geographic clustering.',
+    rows: Array.from({ length: GRID_SIZE }, (_, row) =>
+      Array.from({ length: GRID_SIZE }, (_, col) => ((row + col) % 2 === 0 ? 'B' : 'R')).join(''),
+    ),
+  },
+  islands: {
+    name: 'Blue islands',
+    description: 'Compact Blue clusters surrounded by a Red-leaning outer area.',
+    rows: [
+      'RRRRRRRRRR',
+      'RBBBRRBBBR',
+      'RBBBRRBBBR',
+      'RBBBRRBBBR',
+      'RRRRRRRRRR',
+      'RRRBBBBRRR',
+      'RRRBBBBRRR',
+      'RRRBBBBRRR',
+      'RRRRRRRRRR',
+      'RRRRRRRRRR',
+    ],
+  },
+};
 
-export const SCENARIOS = [
-  {
-    id: 'fair',
-    name: 'Fair / Compact Map',
-    tabLabel: 'Fair / compact',
-    summary: 'Five clean vertical districts keep the result close to the voter split.',
-    explanation:
-      'The compact baseline translates a 51% blue vote share into a narrow 3-2 blue seat edge. It is still simplified, but it tracks the population more closely than the engineered maps.',
-    assignments: [
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-      '1122334455',
-    ],
+export const SCENARIO_DEFINITIONS = {
+  baseline: {
+    id: 'baseline',
+    label: 'Compact baseline',
+    shortLabel: 'Baseline',
+    eyebrow: 'Reference map',
+    summary:
+      'Five equal-population districts use simple rectangular blocks. It is a reference point, not a declaration that the map is fair.',
   },
-  {
-    id: 'packing',
-    name: 'Packing Map',
-    tabLabel: 'Packing',
-    summary: 'Many blue voters are concentrated into two districts.',
-    explanation:
-      'Packing wastes blue votes by placing large blue majorities into a small number of districts. The same voters now give blue only 2 of 5 seats, while red wins the remaining districts.',
-    assignments: [
-      '5533553335',
-      '5111533335',
-      '1111133333',
-      '1111133335',
-      '1111122355',
-      '4112222255',
-      '4442222255',
-      '4442222255',
-      '4444222345',
-      '4444444455',
-    ],
+  'pack-blue': {
+    id: 'pack-blue',
+    label: 'Pack Blue voters',
+    shortLabel: 'Pack Blue',
+    eyebrow: 'Generated scenario',
+    summary:
+      'A constrained search tries to concentrate Blue voters into fewer districts while keeping every district equal in size and contiguous.',
   },
-  {
-    id: 'cracking',
-    name: 'Cracking Map',
-    tabLabel: 'Cracking',
-    summary: 'Blue voters are split below a winning threshold in most districts.',
-    explanation:
-      'Cracking spreads blue voters across several red-leaning districts after one packed blue district. Their votes still appear in the total vote share, but they are divided so that blue wins only 1 of 5 seats.',
-    assignments: [
-      '5522552225',
-      '5522522222',
-      '5511122223',
-      '5111113233',
-      '4111113333',
-      '4111115333',
-      '4411322235',
-      '4444433355',
-      '4444443333',
-      '4444455555',
-    ],
+  'crack-blue': {
+    id: 'crack-blue',
+    label: 'Crack Blue voters',
+    shortLabel: 'Crack Blue',
+    eyebrow: 'Generated scenario',
+    summary:
+      'A constrained search tries to distribute Blue voters just below winning thresholds across several districts.',
   },
-  {
-    id: 'algorithmic',
-    name: 'Algorithmic Advantage Map',
-    tabLabel: 'Algorithmic advantage',
-    summary: 'A search-like map distributes blue voters just efficiently enough to win big.',
-    explanation:
-      'An optimization-style map can do the opposite: blue voters are distributed with just enough support to win four districts, while red voters are concentrated in one losing pattern. A small vote edge becomes an 80% seat share.',
-    assignments: [
-      '5111111555',
-      '1111111155',
-      '5111221225',
-      '5512221225',
-      '5432222225',
-      '5333222244',
-      '3333332444',
-      '3333344444',
-      '5333444444',
-      '5533554445',
-    ],
+  'favor-blue': {
+    id: 'favor-blue',
+    label: 'Optimize for Blue',
+    shortLabel: 'Favor Blue',
+    eyebrow: 'Generated scenario',
+    summary:
+      'A search favors Blue seat wins, then uses compactness as a secondary preference rather than an absolute rule.',
   },
-];
+  'favor-red': {
+    id: 'favor-red',
+    label: 'Optimize for Red',
+    shortLabel: 'Favor Red',
+    eyebrow: 'Generated scenario',
+    summary:
+      'A search favors Red seat wins, then uses compactness as a secondary preference rather than an absolute rule.',
+  },
+};
+
+export function rowsToVoters(rows) {
+  if (rows.length !== GRID_SIZE || rows.some((row) => row.length !== GRID_SIZE)) {
+    throw new Error(`Voter rows must form a ${GRID_SIZE}×${GRID_SIZE} grid.`);
+  }
+
+  const voters = rows.flatMap((row) => [...row]);
+  if (voters.some((party) => !PARTIES[party])) {
+    throw new Error('Voter rows may only contain B and R affiliations.');
+  }
+
+  return voters;
+}
+
+export function votersToRows(voters) {
+  return Array.from({ length: GRID_SIZE }, (_, row) =>
+    voters.slice(row * GRID_SIZE, (row + 1) * GRID_SIZE).join(''),
+  );
+}
+
+export function getCell(index) {
+  return {
+    index,
+    row: Math.floor(index / GRID_SIZE),
+    col: index % GRID_SIZE,
+  };
+}
