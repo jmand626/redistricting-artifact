@@ -1,14 +1,16 @@
 {
   "name": "redistricting-artifact",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "A CSE 480 interactive web artifact about computational redistricting and gerrymandering.",
+  "description": "An interactive toy-data sandbox for exploring redistricting, representation, and metric tradeoffs.",
   "homepage": "https://jmand626.github.io/redistricting-artifact/",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node --test",
+    "check": "npm run test && npm run build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
